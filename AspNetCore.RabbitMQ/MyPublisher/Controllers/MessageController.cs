@@ -56,6 +56,7 @@ namespace MyPublisher.Controllers
                                     arguments: null);
 
                 var consumer = new EventingBasicConsumer(channel);
+
                 consumer.Received += (model, ea) =>
                 {
                     var body = ea.Body.ToArray();
