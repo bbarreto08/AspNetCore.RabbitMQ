@@ -16,15 +16,23 @@ namespace MyPublisher.Controllers
         [HttpPost]
         public IActionResult Send([FromBody] Message msg)
         {
-            var factory = new ConnectionFactory() { HostName = "localhost" };
+            var factory = new ConnectionFactory() { HostName = "localhost", Port = 5672, UserName = "barreto", Password = "barretoPass" };
 
             using(var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
             {
                 string message = JsonConvert.SerializeObject(msg);
+
                 var body = Encoding.UTF8.GetBytes(message);
-                channel.BasicPublish(exchange: "teste",
-                                     routingKey: "key-a",
+
+                channel.QueueDeclare(queue: "fila01",
+                                 durable: true,
+                                 exclusive: false,
+                                 autoDelete: false,
+                                 arguments: null);
+
+                channel.BasicPublish(exchange: "",
+                                     routingKey: "fila01",
                                      basicProperties: null,
                                      body: body);
             }
@@ -32,11 +40,12 @@ namespace MyPublisher.Controllers
             return Ok();
         }
 
+        [HttpGet]
         public IActionResult Read()
         {
             var message = "";
 
-            var factory = new ConnectionFactory() { HostName = "localhost" };
+            var factory = new ConnectionFactory() { HostName = "localhost", Port = 5672, UserName = "barreto", Password = "barretoPass" };
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
             {
